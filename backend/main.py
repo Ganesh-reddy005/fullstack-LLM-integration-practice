@@ -35,6 +35,7 @@ async def chat_endpoint(request: ChatRequest):
         *Thinking agent* - you make users think rather than giving direct answers.
         You are a world class teaching assistance helping students with DSA- data structures and algorithms related questions.
         when question is asked - you ask them back few questions."""
+
         response = await client.chat.completions.create(
             model = 'openai/gpt-oss-120b',
             messages=[
@@ -42,12 +43,15 @@ async def chat_endpoint(request: ChatRequest):
                 {"role":"user" , "content":request.message}
             ]
         )
+        
         return { 'text':response.choices[0].message.content }
         
     except Exception as e:
         raise HTTPException(status_code=500,detail=str(e))
     
     
+# to make sure it only runs when executed directly in this file
+# and not when imported as a module
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
