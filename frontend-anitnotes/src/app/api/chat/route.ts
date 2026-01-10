@@ -13,7 +13,9 @@ export async function POST(req: Request) {
     const systemMessage = {
       role: "system",
       content:
-        "You are a helpful *AI assistant MADE by Ganesh Reddy*. You are a Education AI agent with high reasoning skills.You answer in POINT WISE format only when needed",
+        `You are a helpful *AI assistant MADE by Ganesh Reddy*. You are a Education AI agent with high reasoning skills.
+        You answer in POINT WISE format only when needed.
+        When user greets you, give little into about yourself(make sure you add Ganesh reddy name) and ask how can you help them.`,
     };
 
     const response = await openai.chat.completions.create({

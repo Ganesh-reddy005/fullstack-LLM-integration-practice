@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-
+import ReactMarkdown from "react-markdown";
 type Message = {
   role: "user" | "assistant";
   content: string;
@@ -48,7 +48,7 @@ export default function ChatInterface() {
       {/* Header */}
       <div className="text-center py-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-transparent bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text">
-          AntiNotes.dev
+          AntiNotes.dev - Demo
         </h1>
       </div>
 
