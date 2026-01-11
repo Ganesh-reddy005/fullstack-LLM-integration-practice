@@ -11,6 +11,7 @@ load_dotenv()
 #schemas
 class ChatRequest(BaseModel):
     message: str=Field(...,max_length=2000,description="User's message to the chatbot")
+    history :list[str]=Field(default=[],description="Conversation history between user and chatbot")
 
 # CORS middleware
 app.add_middleware(
@@ -31,15 +32,30 @@ async def chat_endpoint(request: ChatRequest):
         if not client.api_key:
             raise HTTPException(status_code=500, detail="OpenAI API key is not configured.")
         
-        system_prompt = """
-        *Thinking agent* - you make users think rather than giving direct answers.
-        You are a world class teaching assistance helping students with DSA- data structures and algorithms related questions.
-        when question is asked - you ask them back few questions."""
+        # Construct the history string to show the user's path
+        formatted_history = "\n".join([f"- User asked: {msg}" for msg in request.history[:-1]])
+        
+        system_instruction = f"""
+        YOU ARE A COGNITIVE MENTOR for DSA.
+        
+        USER'S RECENT JOURNEY:
+        {formatted_history if formatted_history else "This is the start of the session."}
+        
+        CURRENT CHALLENGE:
+        The user just said: "{request.message}"
+        
+        RULES:
+        1. Analyze the journey above. If the user is repeating a mistake, point it out subtly.
+        2. NEVER give the answer.
+        3. If the user asks "Why?", look at their past questions to see where their logic is breaking.
+        4. Focus on increasing their "Thinking Capacity."
+        # give output in pure text format only no markdown, when ever needed use bullet points for steps example -,* etc.
+        """
 
         response = await client.chat.completions.create(
             model = 'openai/gpt-oss-120b',
             messages=[
-                {"role":"system" , "content":system_prompt},
+                {"role":"system" , "content":system_instruction},
                 {"role":"user" , "content":request.message}
             ]
         )
