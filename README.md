@@ -1,6 +1,10 @@
 # Practising Full stack development with LLM Integration
 
-*Learning* - 
+## Tech Stack
+**Frontend** - Next.js, tailwind, Typescript
+**Backend** - FastAPI
+
+## **Learning's** - 
 - when you get any error from server side -> ex: internal error 500. Always go to */docs* to trace error easily
 - learnt about FastAPI, async vs sync
 - FastAPI -> CROS - cross origin resource sharing
@@ -9,7 +13,7 @@
 - We use - ip adress of servers (2 servers => 1.Frontend 2.Backend) to exchange the data 
 
 ## Context Window Management:
-### 1 My Simpleset Approach
+### 1 My Simplest Approach
 - Tried a simple method -> Pass `last K questions of USER's` to LLM (storing each new question and appending to previous one)
 *Pros*
 * LLM can understand what it's going through
