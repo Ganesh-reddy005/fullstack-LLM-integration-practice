@@ -13,36 +13,35 @@ export default function ChatInterface() {
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage: Message = { role: 'user', content: input };
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     const currentInput = input;
-    setInput("");
+    setInput('');
+
+    // v1- trying to FILTER and Get only the content of the user messages for the history
+    const userOnlyHistory = newMessages
+      .filter(m => m.role === 'user')
+      .map(m => m.content);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: currentInput }),
+      const response = await fetch('http://localhost:8000/chat', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: currentInput,
+          history: userOnlyHistory.slice(-5) // Send the last 5 user inputs for context
+        }),
       });
 
       const data = await response.json();
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.text },
-      ]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.text }]);
     } catch (error) {
-      console.error("Error calling API:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, something went wrong on the backend.",
-        },
-      ]);
+      console.error("Error:", error);
     }
   };
 
+  // Main render
   return (
     <div className="flex flex-col h-screen bg-gray-50 text-gray-900 p-4">
       {/* Header */}
