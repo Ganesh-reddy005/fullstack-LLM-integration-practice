@@ -2,3 +2,8 @@ fastapi
 uvicorn 
 pydantic
 fastapi-cors
+dotenv
+pytest
+httpx
+beanie
+motor
