@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from schema import ChatRequest
+from models import ChatRequest
 from services.llm_service import get_llm_response
 
 router = APIRouter()

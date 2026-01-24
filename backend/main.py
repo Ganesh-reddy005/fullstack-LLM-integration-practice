@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,APIRouter, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,13 +6,21 @@ from beanie import init_beanie
 import os
 from dotenv import load_dotenv
 from request_all.onboarding import router as onboarding_router  # <--- NEW
+# main.py
 
+from request_all.problems import router as problems_router # new -> for problems
+from request_all.profile import router as profile_router
+from request_all.hint import router as hint_router
+from request_all.auth import router as auth_router
+from services.active_user import get_current_user
+from models import UserProfile, User
+from request_all.profile import DashboardResponse
 # Load environment variables from .env
 load_dotenv()
 
 # --- IMPORTS ---
 # 1. Import Database Models
-from models import UserSubmission, ChatLog, UserProfile
+from models import UserSubmission, ChatLog, UserProfile, Problem, User, RevisionItem
 
 # 2. Import Routers (Using your folder name 'request_all')
 from request_all.code_submission import router as submission_router
@@ -44,7 +52,7 @@ async def lifespan(app: FastAPI):
         database = client.antinotes_db 
         
         # 4. Initialize Beanie (ODM)
-        await init_beanie(database=database, document_models=[UserSubmission, ChatLog, UserProfile])
+        await init_beanie(database=database, document_models=[UserSubmission, ChatLog, UserProfile,Problem,User])
         
         print("✅ MongoDB Connected Successfully!")
         
@@ -77,6 +85,10 @@ app.add_middleware(
 app.include_router(submission_router, prefix="/submit", tags=["Submission"])
 app.include_router(chat_router, prefix="/chat", tags=["Chat"])
 app.include_router(onboarding_router, prefix="/onboarding", tags=["Onboarding"]) # <--- NEW
+app.include_router(problems_router, prefix="/problems", tags=["Problems"])
+app.include_router(profile_router, prefix="/profile", tags=["Profile"])
+app.include_router(hint_router, prefix="/hint", tags=["Hint"])
+app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 
 # --- ROOT ENDPOINT (Health Check) ---
 @app.get("/")
@@ -86,6 +98,18 @@ async def root():
         "status": "Running",
         "docs": "http://localhost:8000/docs"
     }
+
+router = APIRouter()
+@router.get("/me", response_model=DashboardResponse)
+async def get_my_profile(current_user: User = Depends(get_current_user)):
+    
+    # We use the ID from the valid token to find the profile
+    profile = await UserProfile.find_one(UserProfile.user_id == str(current_user.id))
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile data not found")
+    
+    return profile
 
 if __name__ == "__main__":
     import uvicorn
